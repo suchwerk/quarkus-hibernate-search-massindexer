@@ -1,50 +1,45 @@
-# quarkus-testcontainers project
+# Test Massindexer
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+## Start a local elasticsearch
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
-
-## Running the application in dev mode
-
-You can run your application in dev mode that enables live coding using:
 ```shell script
-./mvnw compile quarkus:dev
+docker run -it --rm=true --name elasticsearch_quarkus_test -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.5.0
 ```
 
-## Packaging and running the application
+## Run the test
 
-The application can be packaged using:
-```shell script
-./mvnw package
-```
-It produces the `quarkus-testcontainers-1.0.0-SNAPSHOT-runner.jar` file in the `/target` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/lib` directory.
+A postgresql container is created automatically.
 
-If you want to build an _über-jar_, execute the following command:
+Start the test:
+
 ```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
+./mvnw test
 ```
 
-The application is now runnable using `java -jar target/quarkus-testcontainers-1.0.0-SNAPSHOT-runner.jar`.
+## Result
 
-## Creating a native executable
+First a bunch of  FruitEntities will be created.
+Then the rest endpoint for reindexing it called.
 
-You can create a native executable using: 
-```shell script
-./mvnw package -Pnative
+```
+.....
+Caused by: java.sql.SQLException: Connection is closed
+        at io.agroal.pool.wrapper.ConnectionWrapper.lambda$static$0(ConnectionWrapper.java:51)
+        at com.sun.proxy.$Proxy92.prepareStatement(Unknown Source)
+        at io.agroal.pool.wrapper.ConnectionWrapper.prepareStatement(ConnectionWrapper.java:616)
+        at org.hibernate.engine.jdbc.internal.StatementPreparerImpl$5.doPrepare(StatementPreparerImpl.java:149)
+        at org.hibernate.engine.jdbc.internal.StatementPreparerImpl$StatementPreparationTemplate.prepareStatement(StatementPreparerImpl.java:176)
+        ... 27 more
+
+2021-04-12 19:19:02,977 INFO  [org.hib.sea.map.orm.mas.imp.LoggingMassIndexingMonitor] (executor-thread-1) HSEARCH000028: Mass indexing complete. Indexed 8000 entities.
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script
-./mvnw package -Pnative -Dquarkus.native.container-build=true
+### In the index
+
+Indexed in es: 1200 (thats the amount of the first batch process (multiplied by no of threads)
+
 ```
-
-You can then execute your native executable with: `./target/quarkus-testcontainers-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html.
-
-# RESTEasy JAX-RS
-
-Guide: https://quarkus.io/guides/rest-json
-
-
+➜  zeno-mde-client git:(master) curl 'localhost:9200/_cat/indices?v'
+health status index              uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+yellow open   fruitentity-000001 YCOM7soBQDeiRCEaoRUOSA   1   1       1200        11813        1mb            1mb
+```
