@@ -21,8 +21,9 @@ Start the test:
 First a bunch of 8000 FruitEntities will be created.
 Then the rest endpoint for reindexing it called.
 
-```
 ### End of test log
+
+```
 .....
 Caused by: java.sql.SQLException: Connection is closed
         at io.agroal.pool.wrapper.ConnectionWrapper.lambda$static$0(ConnectionWrapper.java:51)
