@@ -39,7 +39,7 @@ Caused by: java.sql.SQLException: Connection is closed
 Indexed in es: 1200 (thats the amount of the first batch process (multiplied by no of threads)
 
 ```
-➜  zeno-mde-client git:(master) curl 'localhost:9200/_cat/indices?v'
+➜ [qhsm] git:(master) curl 'localhost:9200/_cat/indices?v'
 health status index              uuid                   pri rep docs.count docs.deleted store.size pri.store.size
 yellow open   fruitentity-000001 YCOM7soBQDeiRCEaoRUOSA   1   1       1200        11813        1mb            1mb
 ```
